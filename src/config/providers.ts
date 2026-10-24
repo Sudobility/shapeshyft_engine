@@ -9,7 +9,7 @@
  * Catalog verified against provider documentation on 2026-08-18; pricing
  * re-verified against each provider's pricing page on 2026-09-14.
  *
- * - **openai**: GPT-5.6 (Sol/Terra/Luna), GPT-5.5, GPT-5.4, GPT-5, GPT-4.1, GPT-4o
+ * - **openai**: GPT-5.6 (Sol/Terra/Luna), GPT-5.5, GPT-5.4, GPT-5, GPT-4.1, GPT-4o; GPT Image 2.5 (flare/sunburst), GPT Image 2
  * - **anthropic**: Claude Fable 5, Opus 5, Sonnet 5, Haiku 4.5 (+ Opus 4.8/4.7/4.6, Sonnet 4.6)
  * - **gemini**: Gemini 3.7/3.6/3.5/3.1 and 2.5, Nano Banana image models, Veo 3.1 video
  * - **mistral**: Mistral Large 3, Medium 3.5, Small 4, Ministral 3, Codestral
@@ -122,7 +122,8 @@ export const PROVIDERS: ProviderConfig[] = [
   {
     id: "openai",
     name: "OpenAI",
-    description: "GPT-5.6 (Sol, Terra, Luna), GPT-5.5, GPT-5.4, GPT-4.1 models",
+    description:
+      "GPT-5.6 (Sol, Terra, Luna), GPT-5.5, GPT-5.4, GPT-4.1 models; GPT Image 2.5 / 2 image generation",
     allowsCustomModel: false,
     defaultModel: "gpt-5.6-terra",
     requiresEndpointUrl: false,
@@ -247,7 +248,14 @@ export const PROVIDER_MODELS: Record<LlmProvider, string[]> = {
     "gpt-4.1-nano",
     "gpt-4o",
     "gpt-4o-mini",
-    // Image generation
+    // Image generation. gpt-image-2 (Apr 2026) and gpt-image-2.5 (Sep 2026)
+    // supersede gpt-image-1 (which deprecates 2026-10-23). 2.5 ships as two
+    // snapshots at the same price: -flare (default, fast, high-volume) and
+    // -sunburst (flagship, best editing/reference precision). The bare
+    // "gpt-image-2.5" id is NOT callable — use a snapshot.
+    "gpt-image-2.5-sunburst",
+    "gpt-image-2.5-flare",
+    "gpt-image-2",
     "gpt-image-1",
   ],
   anthropic: [
@@ -554,6 +562,36 @@ export const MODEL_CAPABILITIES: Record<string, ModelCapabilities> = {
   // Image generation. visionInput covers reference images sent to the
   // images/edits endpoint. shapeshyft_api's image-provider sends base64 only.
   "gpt-image-1": {
+    visionInput: true,
+    audioInput: false,
+    videoInput: false,
+    imageOutput: true,
+    audioOutput: false,
+    videoOutput: false,
+    mediaFormats: { imageFormats: ["base64"] },
+  },
+  // gpt-image-2 / gpt-image-2.5 share gpt-image-1's shape: reference images in
+  // via images/edits (visionInput), base64 image out. 2.5 accepts up to 16
+  // reference images per call.
+  "gpt-image-2": {
+    visionInput: true,
+    audioInput: false,
+    videoInput: false,
+    imageOutput: true,
+    audioOutput: false,
+    videoOutput: false,
+    mediaFormats: { imageFormats: ["base64"] },
+  },
+  "gpt-image-2.5-flare": {
+    visionInput: true,
+    audioInput: false,
+    videoInput: false,
+    imageOutput: true,
+    audioOutput: false,
+    videoOutput: false,
+    mediaFormats: { imageFormats: ["base64"] },
+  },
+  "gpt-image-2.5-sunburst": {
     visionInput: true,
     audioInput: false,
     videoInput: false,
@@ -1497,6 +1535,23 @@ export const MODEL_PRICING: Record<string, ModelPricing> = {
   // per-image fallback (~$0.04 medium 1024^2; 0.011 low – 0.167 high, quality-
   // dependent). Verify on OpenAI's pricing page; model may deprecate 2026-10-23.
   "gpt-image-1": { input: 500, output: 4000, imageInput: 1, imageOutput: 4.2 },
+  // gpt-image-2: text in $5/1M, image in $10/1M, image-output tokens $40/1M.
+  "gpt-image-2": { input: 500, output: 4000, imageInput: 1, imageOutput: 4.2 },
+  // gpt-image-2.5 (-flare and -sunburst, same rates): text in $5/1M, image in
+  // $8/1M, image-output tokens $30/1M — cheaper than v1/v2. Token usage drives
+  // the estimate; imageOutput (~$0.03 medium 1024^2) is the per-image fallback.
+  "gpt-image-2.5-flare": {
+    input: 500,
+    output: 3000,
+    imageInput: 0.8,
+    imageOutput: 3,
+  },
+  "gpt-image-2.5-sunburst": {
+    input: 500,
+    output: 3000,
+    imageInput: 0.8,
+    imageOutput: 3,
+  },
 
   // Anthropic — https://platform.claude.com/docs/en/about-claude/pricing
   // 4.6 and later: full 1M context at standard rates, no long-context surcharge.

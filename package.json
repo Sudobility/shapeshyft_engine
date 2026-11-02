@@ -1,6 +1,6 @@
 {
   "name": "@sudobility/shapeshyft_engine",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "Stateless LLM structured-output engine shared by ShapeShyft and ShapeRouter",
   "type": "module",
   "main": "./dist/index.js",
@@ -45,7 +45,7 @@
   "author": "Sudobility",
   "license": "BUSL-1.1",
   "dependencies": {
-    "@sudobility/types": "^1.9.76"
+    "@sudobility/types": "^1.9.78"
   },
   "peerDependencies": {
     "@anthropic-ai/sdk": "^0.39.0",

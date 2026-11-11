@@ -5,7 +5,7 @@
     "": {
       "name": "@sudobility/shapeshyft_engine",
       "dependencies": {
-        "@sudobility/types": "^1.9.79",
+        "@sudobility/types": "^1.10.1",
       },
       "devDependencies": {
         "@anthropic-ai/sdk": "~0.39.0",
@@ -169,7 +169,7 @@
 
     "@standard-schema/spec": ["@standard-schema/spec@1.1.0", "", {}, "sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w=="],
 
-    "@sudobility/types": ["@sudobility/types@1.9.79", "https://npm.pkg.github.com/download/@sudobility/types/1.9.79/59975e39d6ab7e215418a489ef3cfe214b7521f4", {}, "sha512-rRtDT++fVy+I1m6E31fq752lxCQytFzwfqpJe5wDMPLcC1rJOBa7v+4+5e3cmX8VV1CsuLg8PTLMFe6A7AELRQ=="],
+    "@sudobility/types": ["@sudobility/types@1.10.1", "https://npm.pkg.github.com/download/@sudobility/types/1.10.1/8e353f55822e0bc3fa9555dfe3aee593e140c012", {}, "sha512-LmJyjDDY5rHDET1wstkT0i59SSOrOXijL2iqrgfcK6VHtKcBEw7FFpbw4CyHn+dhR9kqkYpEydSfypoqw7crMg=="],
 
     "@types/bun": ["@types/bun@1.4.2", "", { "dependencies": { "bun-types": "1.4.2" } }, "sha512-GimotNn7+ZV0uVArItBbriZsR1oNf0+WTzPkdcFrzShI7k2norL0uzEaJT8T33dWr7O/c9ZDuAFQrctKCi72oQ=="],
 

@@ -26,6 +26,18 @@
  *   generation -- see the Jev section below before assuming it behaves like
  *   the providers above.
  *
+ * Image-generation providers (output images, not text/structured JSON; an
+ * endpoint is compatible only when its output schema declares an image field).
+ * Their real API calls live in each product's image-provider wrapper (e.g.
+ * shapeshyft_api/src/image-provider.ts), not in the engine adapters; the engine
+ * returns an image-only stub from createLLMProvider and prices per generated
+ * image via `imageOutput`:
+ * - **bytedance**: ByteDance Seedream 4/4.5/5 and SeedEdit (BytePlus ModelArk)
+ * - **bfl**: Black Forest Labs FLUX1.1, Kontext, FLUX.2, FLUX 3 (async submit/poll)
+ * - **ideogram**: Ideogram 3.0 (text rendering)
+ * - **recraft**: Recraft V3 raster and vector (SVG)
+ * - **stability**: Stable Image Ultra/Core and Stable Diffusion 3.5
+ *
  * ## Keeping this current
  *
  * Model lineups turn over every few weeks and retired IDs fail at the provider,
@@ -221,6 +233,52 @@ export const PROVIDERS: ProviderConfig[] = [
     defaultModel: "openai/gpt-5.6-terra",
     requiresEndpointUrl: false,
   },
+  // Image-generation providers. These generate images rather than text, so an
+  // endpoint is compatible only when its output schema declares image output.
+  {
+    id: "bytedance",
+    name: "ByteDance Seedream",
+    description:
+      "Seedream 4/4.5/5 and SeedEdit image generation via BytePlus ModelArk",
+    allowsCustomModel: false,
+    defaultModel: "seedream-4-0-250828",
+    requiresEndpointUrl: false,
+  },
+  {
+    id: "bfl",
+    name: "Black Forest Labs (FLUX)",
+    description:
+      "FLUX1.1, FLUX.1 Kontext, FLUX.2 and FLUX 3 image generation and editing",
+    allowsCustomModel: false,
+    defaultModel: "flux-pro-1.1",
+    requiresEndpointUrl: false,
+  },
+  {
+    id: "ideogram",
+    name: "Ideogram",
+    description:
+      "Ideogram 3.0 image generation with best-in-class text rendering",
+    allowsCustomModel: false,
+    defaultModel: "ideogram-3",
+    requiresEndpointUrl: false,
+  },
+  {
+    id: "recraft",
+    name: "Recraft",
+    description: "Recraft V3 raster and vector (SVG) image generation",
+    allowsCustomModel: false,
+    defaultModel: "recraftv3",
+    requiresEndpointUrl: false,
+  },
+  {
+    id: "stability",
+    name: "Stability AI",
+    description:
+      "Stable Image Ultra/Core and Stable Diffusion 3.5 image generation",
+    allowsCustomModel: false,
+    defaultModel: "stable-image-core",
+    requiresEndpointUrl: false,
+  },
 ];
 
 // =============================================================================
@@ -405,6 +463,41 @@ export const PROVIDER_MODELS: Record<LlmProvider, string[]> = {
     "openai/gpt-5.6-terra",
     "anthropic/claude-sonnet-5",
     "deepseek/deepseek-v4-pro",
+  ],
+  // ByteDance Seedream -- https://docs.byteplus.com/docs/en/modelark/model-list
+  // BytePlus (international) model IDs; Volcano Ark (China) prefixes `doubao-`.
+  bytedance: [
+    "dola-seedream-5-5-261028", // Seedream 5.5
+    "dola-seedream-5-0-pro-260628", // Seedream 5.0 Pro
+    "dola-seedream-5-0-flash-260915", // Seedream 5.0 Flash
+    "seedream-5-0-lite-260128", // Seedream 5.0 Lite
+    "seedream-4-5-251128", // Seedream 4.5
+    "seedream-4-0-250828", // Seedream 4.0
+    "seededit-3-0-i2i-250628", // SeedEdit 3.0 (image-to-image edit)
+  ],
+  // Black Forest Labs FLUX -- https://docs.bfl.ai/api-reference
+  bfl: [
+    "flux-pro-1.1", // FLUX1.1 [pro]
+    "flux-pro-1.1-ultra", // FLUX1.1 [pro] Ultra
+    "flux-dev", // FLUX.1 [dev]
+    "flux-kontext-pro", // FLUX.1 Kontext [pro] (edit)
+    "flux-kontext-max", // FLUX.1 Kontext [max] (edit)
+    "flux-2-pro", // FLUX.2 [pro]
+    "flux-3-image", // FLUX 3
+  ],
+  // Ideogram -- https://developer.ideogram.ai/v2. `-turbo`/`-quality` map onto
+  // the API's rendering_speed; all three hit the ideogram-3 endpoint.
+  ideogram: ["ideogram-3", "ideogram-3-turbo", "ideogram-3-quality"],
+  // Recraft -- https://www.recraft.ai/docs/api-reference
+  recraft: ["recraftv3", "recraftv3_vector", "recraftv2"],
+  // Stability AI -- https://docs.stability.ai/api-reference. ultra/core are
+  // their own endpoints; sd3.5-* hit /sd3 with a model field.
+  stability: [
+    "stable-image-ultra",
+    "stable-image-core",
+    "sd3.5-large",
+    "sd3.5-large-turbo",
+    "sd3.5-medium",
   ],
 };
 
@@ -1445,6 +1538,55 @@ export const MODEL_CAPABILITIES: Record<string, ModelCapabilities> = {
     audioOutput: false,
     videoOutput: false,
   },
+
+  // Image-generation models. All produce images (imageOutput); visionInput is
+  // set where the model accepts reference/source images for editing or
+  // image-to-image. The image-provider wrapper sends references as base64.
+  ...Object.fromEntries(
+    [
+      // ByteDance Seedream
+      "dola-seedream-5-5-261028",
+      "dola-seedream-5-0-pro-260628",
+      "dola-seedream-5-0-flash-260915",
+      "seedream-5-0-lite-260128",
+      "seedream-4-5-251128",
+      "seedream-4-0-250828",
+      "seededit-3-0-i2i-250628",
+      // Black Forest Labs FLUX
+      "flux-pro-1.1",
+      "flux-pro-1.1-ultra",
+      "flux-dev",
+      "flux-kontext-pro",
+      "flux-kontext-max",
+      "flux-2-pro",
+      "flux-3-image",
+      // Ideogram
+      "ideogram-3",
+      "ideogram-3-turbo",
+      "ideogram-3-quality",
+      // Recraft
+      "recraftv3",
+      "recraftv3_vector",
+      "recraftv2",
+      // Stability AI
+      "stable-image-ultra",
+      "stable-image-core",
+      "sd3.5-large",
+      "sd3.5-large-turbo",
+      "sd3.5-medium",
+    ].map(id => [
+      id,
+      {
+        visionInput: true,
+        audioInput: false,
+        videoInput: false,
+        imageOutput: true,
+        audioOutput: false,
+        videoOutput: false,
+        mediaFormats: { imageFormats: ["base64"] },
+      } satisfies ModelCapabilities,
+    ])
+  ),
 };
 
 // =============================================================================
@@ -1884,6 +2026,41 @@ export const MODEL_PRICING: Record<string, ModelPricing> = {
   "jev-latest": { input: 4.2, output: 0 },
   "jev-preview": { input: 4.2, output: 0 },
   "jev-1.13.0": { input: 4.2, output: 0 },
+
+  // Image-generation models. No token billing: `input`/`output` are 0 and
+  // `imageOutput` is cents per generated image. Where a vendor's per-image
+  // price varies by resolution, a representative tier is used (see comments);
+  // re-verify against the vendor's pricing page before relying on exact cents.
+  // ByteDance Seedream -- https://docs.byteplus.com/docs/en/modelark/model-pricing
+  "dola-seedream-5-5-261028": { input: 0, output: 0, imageOutput: 3.5 }, // $0.020 low-res / $0.035 high-res
+  "dola-seedream-5-0-pro-260628": { input: 0, output: 0, imageOutput: 4.5 }, // $0.045 (≤2.61MP) / $0.09 above
+  "dola-seedream-5-0-flash-260915": { input: 0, output: 0, imageOutput: 1.8 }, // $0.018
+  "seedream-5-0-lite-260128": { input: 0, output: 0, imageOutput: 3.5 }, // $0.035
+  "seedream-4-5-251128": { input: 0, output: 0, imageOutput: 4.0 }, // $0.04
+  "seedream-4-0-250828": { input: 0, output: 0, imageOutput: 3.0 }, // $0.03
+  "seededit-3-0-i2i-250628": { input: 0, output: 0, imageOutput: 3.0 }, // $0.03
+  // Black Forest Labs FLUX -- https://bfl.ai/pricing
+  "flux-pro-1.1": { input: 0, output: 0, imageOutput: 4.0 }, // $0.04
+  "flux-pro-1.1-ultra": { input: 0, output: 0, imageOutput: 6.0 }, // $0.06
+  "flux-dev": { input: 0, output: 0, imageOutput: 2.5 }, // $0.025
+  "flux-kontext-pro": { input: 0, output: 0, imageOutput: 4.0 }, // $0.04
+  "flux-kontext-max": { input: 0, output: 0, imageOutput: 8.0 }, // $0.08
+  "flux-2-pro": { input: 0, output: 0, imageOutput: 3.0 }, // $0.03/MP (first MP; +$0.015/addl)
+  "flux-3-image": { input: 0, output: 0, imageOutput: 4.8 }, // $0.048 at 1K (higher at 1.5K+)
+  // Ideogram -- https://ideogram.ai/pricing?pricing_tab=api
+  "ideogram-3": { input: 0, output: 0, imageOutput: 6.0 }, // Default $0.06
+  "ideogram-3-turbo": { input: 0, output: 0, imageOutput: 3.0 }, // Turbo $0.03
+  "ideogram-3-quality": { input: 0, output: 0, imageOutput: 9.0 }, // Quality $0.09
+  // Recraft -- https://www.recraft.ai/docs/api-reference/pricing
+  recraftv3: { input: 0, output: 0, imageOutput: 4.0 }, // $0.04 raster
+  recraftv3_vector: { input: 0, output: 0, imageOutput: 8.0 }, // $0.08 vector
+  recraftv2: { input: 0, output: 0, imageOutput: 2.2 }, // $0.022 raster
+  // Stability AI -- https://docs.stability.ai/pricing (1 credit = $0.01)
+  "stable-image-ultra": { input: 0, output: 0, imageOutput: 8.0 }, // 8 credits
+  "stable-image-core": { input: 0, output: 0, imageOutput: 3.0 }, // 3 credits
+  "sd3.5-large": { input: 0, output: 0, imageOutput: 6.5 }, // 6.5 credits
+  "sd3.5-large-turbo": { input: 0, output: 0, imageOutput: 4.0 }, // 4 credits
+  "sd3.5-medium": { input: 0, output: 0, imageOutput: 3.5 }, // 3.5 credits
 };
 
 // Default pricing for unknown models

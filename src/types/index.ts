@@ -34,7 +34,16 @@ export type LlmProvider =
   | "perplexity"
   | "lm_studio"
   | "jev"
-  | "openrouter";
+  | "openrouter"
+  // Image-generation providers (output images, not text/structured JSON). Their
+  // real API calls live in each product's image-provider wrapper (e.g.
+  // shapeshyft_api/src/image-provider.ts); the engine registers them in the
+  // catalog and returns an image-only stub from createLLMProvider.
+  | "bytedance"
+  | "bfl"
+  | "ideogram"
+  | "recraft"
+  | "stability";
 
 export type HttpMethod = "GET" | "POST";
 
@@ -188,6 +197,67 @@ export type LlmServerModel =
   | "janus-pro-7b"
   | string;
 
+/**
+ * ByteDance Seedream image models (verified 2026-11-23 against BytePlus ModelArk
+ * docs.byteplus.com/docs/en/modelark/model-list). Bare IDs are the BytePlus
+ * (international) namespace; Volcano Engine Ark (China) prefixes the same
+ * snapshots with `doubao-`. The engine registers the BytePlus IDs.
+ * @see https://docs.byteplus.com/docs/en/modelark/image-generation-api
+ */
+export type BytedanceModel =
+  | "dola-seedream-5-5-261028"
+  | "dola-seedream-5-0-pro-260628"
+  | "dola-seedream-5-0-flash-260915"
+  | "seedream-5-0-lite-260128"
+  | "seedream-4-5-251128"
+  | "seedream-4-0-250828"
+  | "seededit-3-0-i2i-250628";
+
+/**
+ * Black Forest Labs FLUX image models (verified 2026-11-23 against docs.bfl.ai).
+ * These are the submit-endpoint slugs (`POST /v1/<slug>`); generation is async
+ * (submit returns a polling_url).
+ * @see https://docs.bfl.ai/api-reference
+ */
+export type BflModel =
+  | "flux-pro-1.1"
+  | "flux-pro-1.1-ultra"
+  | "flux-dev"
+  | "flux-kontext-pro"
+  | "flux-kontext-max"
+  | "flux-2-pro"
+  | "flux-3-image";
+
+/**
+ * Ideogram image models (verified 2026-11-23 against developer.ideogram.ai v2).
+ * The model is selected by the URL path (`/v2/image/generate/ideogram-3`); the
+ * `-turbo`/`-quality` suffixes here are synthetic ids the adapter maps onto the
+ * API's `rendering_speed` (TURBO/DEFAULT/QUALITY) so callers can pick the tier.
+ * @see https://developer.ideogram.ai/v2/api-reference/images/generate/ideogram-3
+ */
+export type IdeogramModel =
+  "ideogram-3" | "ideogram-3-turbo" | "ideogram-3-quality";
+
+/**
+ * Recraft image models (verified 2026-11-23 against recraft.ai/docs). `model`
+ * body field; `_vector` variants emit SVG/vector output.
+ * @see https://www.recraft.ai/docs/api-reference/models/recraft-v3
+ */
+export type RecraftModel = "recraftv3" | "recraftv3_vector" | "recraftv2";
+
+/**
+ * Stability AI image models (verified 2026-11-23 against docs.stability.ai).
+ * `stable-image-ultra`/`-core` are their own endpoints; the `sd3.5-*` ids hit
+ * the `/sd3` endpoint with a `model` field.
+ * @see https://docs.stability.ai/api-reference
+ */
+export type StabilityModel =
+  | "stable-image-ultra"
+  | "stable-image-core"
+  | "sd3.5-large"
+  | "sd3.5-large-turbo"
+  | "sd3.5-medium";
+
 /** Union of all model types */
 export type LlmModel =
   | OpenAiModel
@@ -200,6 +270,11 @@ export type LlmModel =
   | DeepSeekModel
   | PerplexityModel
   | JevModel
+  | BytedanceModel
+  | BflModel
+  | IdeogramModel
+  | RecraftModel
+  | StabilityModel
   | LlmServerModel;
 
 /** List of available providers */
@@ -216,6 +291,11 @@ export const LLM_PROVIDERS: LlmProvider[] = [
   "lm_studio",
   "jev",
   "openrouter",
+  "bytedance",
+  "bfl",
+  "ideogram",
+  "recraft",
+  "stability",
 ];
 
 /**
@@ -331,6 +411,34 @@ export const PROVIDER_MODELS: Record<LlmProvider, readonly string[]> = {
     "openai/gpt-5.6-terra",
     "anthropic/claude-sonnet-5",
     "deepseek/deepseek-v4-pro",
+  ] as const,
+  // Image-generation providers (see the LlmProvider union note).
+  bytedance: [
+    "dola-seedream-5-5-261028",
+    "dola-seedream-5-0-pro-260628",
+    "dola-seedream-5-0-flash-260915",
+    "seedream-5-0-lite-260128",
+    "seedream-4-5-251128",
+    "seedream-4-0-250828",
+    "seededit-3-0-i2i-250628",
+  ] as const,
+  bfl: [
+    "flux-pro-1.1",
+    "flux-pro-1.1-ultra",
+    "flux-dev",
+    "flux-kontext-pro",
+    "flux-kontext-max",
+    "flux-2-pro",
+    "flux-3-image",
+  ] as const,
+  ideogram: ["ideogram-3", "ideogram-3-turbo", "ideogram-3-quality"] as const,
+  recraft: ["recraftv3", "recraftv3_vector", "recraftv2"] as const,
+  stability: [
+    "stable-image-ultra",
+    "stable-image-core",
+    "sd3.5-large",
+    "sd3.5-large-turbo",
+    "sd3.5-medium",
   ] as const,
 } as const;
 

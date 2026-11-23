@@ -39,6 +39,15 @@ export const PROVIDER_ENDPOINTS: Record<LlmProvider, string> = {
   lm_studio: "{custom_endpoint}",
   jev: "https://api.typesafe.ai/v1/systemone",
   openrouter: "https://openrouter.ai/api/v1/chat/completions",
+  // Image-generation providers. These are image-generation submit endpoints,
+  // not chat APIs; the real calls (model-dependent paths, polling, multipart)
+  // are made by each product's image-provider wrapper.
+  bytedance:
+    "https://ark.ap-southeast.bytepluses.com/api/v3/images/generations",
+  bfl: "https://api.bfl.ai/v1/{model}",
+  ideogram: "https://api.ideogram.ai/v2/image/generate/ideogram-3",
+  recraft: "https://external.api.recraft.ai/v1/images/generations",
+  stability: "https://api.stability.ai/v2beta/stable-image/generate/{model}",
 };
 
 /** The `anthropic-version` header the Messages API requires. */

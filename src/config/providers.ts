@@ -186,7 +186,8 @@ export const PROVIDERS: ProviderConfig[] = [
   {
     id: "xai",
     name: "xAI",
-    description: "Grok 4.6, 4.5, 4.3 and Grok Build models",
+    description:
+      "Grok 4.6, 4.5, 4.3 and Grok Build models; Grok Imagine image generation",
     allowsCustomModel: false,
     defaultModel: "grok-4.6",
     requiresEndpointUrl: false,
@@ -277,6 +278,81 @@ export const PROVIDERS: ProviderConfig[] = [
       "Stable Image Ultra/Core and Stable Diffusion 3.5 image generation",
     allowsCustomModel: false,
     defaultModel: "stable-image-core",
+    requiresEndpointUrl: false,
+  },
+  {
+    id: "fal",
+    name: "fal.ai",
+    description:
+      "Image aggregator: one API in front of Flux, SDXL, Qwen-Image, Seedream, Luma and more",
+    allowsCustomModel: true,
+    defaultModel: "fal-ai/flux/dev",
+    requiresEndpointUrl: false,
+  },
+  {
+    id: "leonardo",
+    name: "Leonardo.ai",
+    description:
+      "Lucid Origin, Phoenix and Flux image generation with character consistency",
+    allowsCustomModel: false,
+    defaultModel: "lucid-origin",
+    requiresEndpointUrl: false,
+  },
+  {
+    id: "luma",
+    name: "Luma AI",
+    description: "Photon and Photon Flash image generation",
+    allowsCustomModel: false,
+    defaultModel: "photon-1",
+    requiresEndpointUrl: false,
+  },
+  {
+    id: "alibaba",
+    name: "Alibaba Qwen-Image",
+    description: "Qwen-Image text-to-image via Alibaba Cloud Model Studio",
+    allowsCustomModel: false,
+    defaultModel: "qwen-image-2.0",
+    requiresEndpointUrl: false,
+  },
+  {
+    id: "runway",
+    name: "Runway",
+    description: "Gen-4 image generation (text-to-image and reference images)",
+    allowsCustomModel: false,
+    defaultModel: "gen4_image",
+    requiresEndpointUrl: false,
+  },
+  {
+    id: "kling",
+    name: "Kling (Kuaishou)",
+    description: "Kling text-to-video generation",
+    allowsCustomModel: false,
+    defaultModel: "kling-2.6",
+    requiresEndpointUrl: false,
+  },
+  {
+    id: "minimax",
+    name: "MiniMax Hailuo",
+    description: "Hailuo text-to-video generation",
+    allowsCustomModel: false,
+    defaultModel: "MiniMax-Hailuo-02",
+    requiresEndpointUrl: false,
+  },
+  {
+    id: "pika",
+    name: "Pika",
+    description:
+      "Multi-vendor video gateway; the model is a vendor/model/function operation slug",
+    allowsCustomModel: true,
+    defaultModel: "pika/pika-2.5/text-to-video",
+    requiresEndpointUrl: false,
+  },
+  {
+    id: "elevenlabs",
+    name: "ElevenLabs",
+    description: "Text-to-speech audio generation",
+    allowsCustomModel: false,
+    defaultModel: "eleven_multilingual_v2",
     requiresEndpointUrl: false,
   },
 ];
@@ -396,6 +472,9 @@ export const PROVIDER_MODELS: Record<LlmProvider, string[]> = {
     "grok-4.20-0309-non-reasoning",
     "grok-4.20-multi-agent-0309",
     "grok-build-0.1",
+    // Image generation (Grok Imagine) -- https://docs.x.ai
+    "grok-imagine-image-2.0",
+    "grok-imagine-image",
   ],
   deepseek: [
     "deepseek-flash", // V4.1 Flash (2026-09-10)
@@ -498,6 +577,52 @@ export const PROVIDER_MODELS: Record<LlmProvider, string[]> = {
     "sd3.5-large",
     "sd3.5-large-turbo",
     "sd3.5-medium",
+  ],
+  // fal.ai aggregator -- https://fal.ai/models. Suggestions only; any fal
+  // `owner/app[/path]` id is accepted (allowsCustomModel).
+  fal: [
+    "fal-ai/flux/dev",
+    "fal-ai/flux/schnell",
+    "fal-ai/flux-pro/v1.1",
+    "fal-ai/fast-sdxl",
+    "fal-ai/recraft/v3/text-to-image",
+    "fal-ai/ideogram/v3",
+    "fal-ai/qwen-image",
+    "fal-ai/bytedance/seedream/v4/text-to-image",
+    "fal-ai/luma-photon",
+  ],
+  // Leonardo.ai -- https://docs.leonardo.ai. Friendly ids mapped to modelId UUIDs.
+  leonardo: [
+    "lucid-origin",
+    "lucid-realism",
+    "phoenix-1.0",
+    "flux-dev",
+    "flux-schnell",
+  ],
+  // Luma Photon -- https://docs.lumalabs.ai (text-to-image only; refs need public URLs)
+  luma: ["photon-1", "photon-flash-1"],
+  // Alibaba Qwen-Image -- https://help.aliyun.com/en/model-studio (synchronous)
+  alibaba: ["qwen-image-3.0-pro", "qwen-image-2.0"],
+  // Runway Gen-4 -- https://docs.dev.runwayml.com (gen4_image_turbo needs a reference)
+  runway: ["gen4_image", "gen4_image_turbo"],
+  // Kling (Kuaishou) video -- https://kling.ai/document-api (model id in URL path)
+  kling: ["kling-2.6", "kling-2.5-turbo", "kling-4.0", "kling-4.0-flash"],
+  // MiniMax Hailuo video -- https://platform.minimax.io
+  minimax: [
+    "MiniMax-Hailuo-2.3",
+    "MiniMax-Hailuo-02",
+    "T2V-01-Director",
+    "T2V-01",
+  ],
+  // Pika video gateway -- https://dev.pika.art. Any vendor/model/function slug
+  // (allowsCustomModel); these are suggestions pulled live from its catalog.
+  pika: ["pika/pika-2.5/text-to-video", "pika/pika-2.5/image-to-video"],
+  // ElevenLabs text-to-speech -- https://elevenlabs.io/docs
+  elevenlabs: [
+    "eleven_multilingual_v2",
+    "eleven_v4",
+    "eleven_v3",
+    "eleven_flash_v2_5",
   ],
 };
 
@@ -1574,6 +1699,33 @@ export const MODEL_CAPABILITIES: Record<string, ModelCapabilities> = {
       "sd3.5-large",
       "sd3.5-large-turbo",
       "sd3.5-medium",
+      // xAI Grok Imagine
+      "grok-imagine-image-2.0",
+      "grok-imagine-image",
+      // fal.ai suggestions
+      "fal-ai/flux/dev",
+      "fal-ai/flux/schnell",
+      "fal-ai/flux-pro/v1.1",
+      "fal-ai/fast-sdxl",
+      "fal-ai/recraft/v3/text-to-image",
+      "fal-ai/ideogram/v3",
+      "fal-ai/qwen-image",
+      "fal-ai/bytedance/seedream/v4/text-to-image",
+      "fal-ai/luma-photon",
+      // Leonardo.ai
+      "lucid-origin",
+      "lucid-realism",
+      "phoenix-1.0",
+      "flux-schnell",
+      // Luma Photon
+      "photon-1",
+      "photon-flash-1",
+      // Alibaba Qwen-Image
+      "qwen-image-3.0-pro",
+      "qwen-image-2.0",
+      // Runway Gen-4
+      "gen4_image",
+      "gen4_image_turbo",
     ].map(id => [
       id,
       {
@@ -1584,6 +1736,53 @@ export const MODEL_CAPABILITIES: Record<string, ModelCapabilities> = {
         audioOutput: false,
         videoOutput: false,
         mediaFormats: { imageFormats: ["base64"] },
+      } satisfies ModelCapabilities,
+    ])
+  ),
+
+  // Audio-generation models (text-to-speech): audio out, no media in.
+  ...Object.fromEntries(
+    [
+      "eleven_multilingual_v2",
+      "eleven_v4",
+      "eleven_v3",
+      "eleven_flash_v2_5",
+    ].map(id => [
+      id,
+      {
+        visionInput: false,
+        audioInput: false,
+        videoInput: false,
+        imageOutput: false,
+        audioOutput: true,
+        videoOutput: false,
+      } satisfies ModelCapabilities,
+    ])
+  ),
+
+  // Video-generation models: video out. visionInput true where the model takes
+  // a source image (image-to-video); the adapters here do text-to-video.
+  ...Object.fromEntries(
+    [
+      // Kling (Kuaishou)
+      "kling-2.6",
+      "kling-2.5-turbo",
+      "kling-4.0",
+      "kling-4.0-flash",
+      // MiniMax Hailuo
+      "MiniMax-Hailuo-2.3",
+      "MiniMax-Hailuo-02",
+      "T2V-01-Director",
+      "T2V-01",
+    ].map(id => [
+      id,
+      {
+        visionInput: true,
+        audioInput: false,
+        videoInput: false,
+        imageOutput: false,
+        audioOutput: false,
+        videoOutput: true,
       } satisfies ModelCapabilities,
     ])
   ),
@@ -2061,6 +2260,47 @@ export const MODEL_PRICING: Record<string, ModelPricing> = {
   "sd3.5-large": { input: 0, output: 0, imageOutput: 6.5 }, // 6.5 credits
   "sd3.5-large-turbo": { input: 0, output: 0, imageOutput: 4.0 }, // 4 credits
   "sd3.5-medium": { input: 0, output: 0, imageOutput: 3.5 }, // 3.5 credits
+  // xAI Grok Imagine -- https://docs.x.ai
+  "grok-imagine-image-2.0": { input: 0, output: 0, imageOutput: 4.0 }, // $0.04
+  "grok-imagine-image": { input: 0, output: 0, imageOutput: 2.0 }, // $0.02
+  // Luma Photon -- https://docs.lumalabs.ai
+  "photon-1": { input: 0, output: 0, imageOutput: 1.5 }, // $0.015 / 1080p image
+  "photon-flash-1": { input: 0, output: 0, imageOutput: 0.2 }, // $0.002
+  // Alibaba Qwen-Image -- https://www.alibabacloud.com/help/en/model-studio
+  "qwen-image-3.0-pro": { input: 0, output: 0, imageOutput: 3.4 }, // ~$0.034 (1K)
+  "qwen-image-2.0": { input: 0, output: 0, imageOutput: 2.5 }, // ~$0.025 (estimate)
+  // Runway Gen-4 -- https://docs.dev.runwayml.com/guides/pricing
+  gen4_image: { input: 0, output: 0, imageOutput: 8.0 }, // 5 credits @720p, 8 @1080p
+  gen4_image_turbo: { input: 0, output: 0, imageOutput: 2.0 }, // 2 credits
+  // Leonardo.ai -- pay-as-you-go; the adapter reads the response `cost`. These
+  // are fallbacks used only if that is absent.
+  "lucid-origin": { input: 0, output: 0, imageOutput: 4.0 },
+  "lucid-realism": { input: 0, output: 0, imageOutput: 4.0 },
+  "phoenix-1.0": { input: 0, output: 0, imageOutput: 4.0 },
+  // fal.ai -- the adapter reads the `unit_price` fal returns; these are
+  // fallbacks for the common suggestions.
+  "fal-ai/flux/dev": { input: 0, output: 0, imageOutput: 2.5 }, // $0.025/image
+  "fal-ai/flux/schnell": { input: 0, output: 0, imageOutput: 0.3 },
+  "fal-ai/flux-pro/v1.1": { input: 0, output: 0, imageOutput: 4.0 },
+  "fal-ai/fast-sdxl": { input: 0, output: 0, imageOutput: 0.5 },
+  "fal-ai/qwen-image": { input: 0, output: 0, imageOutput: 2.5 },
+  "fal-ai/luma-photon": { input: 0, output: 0, imageOutput: 1.9 }, // $0.019/MP
+  // Audio (text-to-speech): billed per character by the adapter (billedCostCents).
+  // ElevenLabs -- https://elevenlabs.io/pricing/api ($0.08 / $0.04 per 1K chars).
+  eleven_multilingual_v2: { input: 0, output: 0 },
+  eleven_v4: { input: 0, output: 0 },
+  eleven_v3: { input: 0, output: 0 },
+  eleven_flash_v2_5: { input: 0, output: 0 },
+  // Video: billed per second of output by the adapter (billedCostCents).
+  // Kling -- https://kling.ai/document-api/pricing; MiniMax Hailuo.
+  "kling-2.6": { input: 0, output: 0, videoOutput: 420 }, // ~$0.07/s @1080p -> cents/min
+  "kling-2.5-turbo": { input: 0, output: 0, videoOutput: 420 },
+  "kling-4.0": { input: 0, output: 0, videoOutput: 1410 }, // ~$0.235/s @1080p
+  "kling-4.0-flash": { input: 0, output: 0, videoOutput: 564 },
+  "MiniMax-Hailuo-2.3": { input: 0, output: 0 },
+  "MiniMax-Hailuo-02": { input: 0, output: 0 },
+  "T2V-01-Director": { input: 0, output: 0 },
+  "T2V-01": { input: 0, output: 0 },
 };
 
 // Default pricing for unknown models

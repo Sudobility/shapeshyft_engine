@@ -48,6 +48,19 @@ export const PROVIDER_ENDPOINTS: Record<LlmProvider, string> = {
   ideogram: "https://api.ideogram.ai/v2/image/generate/ideogram-3",
   recraft: "https://external.api.recraft.ai/v1/images/generations",
   stability: "https://api.stability.ai/v2beta/stable-image/generate/{model}",
+  // Image aggregator / more image vendors.
+  fal: "https://fal.run/{model}",
+  leonardo: "https://cloud.leonardo.ai/api/rest/v1/generations",
+  luma: "https://api.lumalabs.ai/dream-machine/v1/generations/image",
+  alibaba:
+    "https://dashscope-intl.aliyuncs.com/api/v1/services/aigc/multimodal-generation/generation",
+  runway: "https://api.dev.runwayml.com/v1/text_to_image",
+  // Video-generation providers.
+  kling: "https://api-singapore.klingai.com/text-to-video/{model}",
+  minimax: "https://api.minimax.io/v1/video_generation",
+  pika: "https://api.dev.pika.art/v1/media/{model}",
+  // Audio-generation provider (text-to-speech).
+  elevenlabs: "https://api.elevenlabs.io/v1/text-to-speech/{voice_id}",
 };
 
 /** The `anthropic-version` header the Messages API requires. */

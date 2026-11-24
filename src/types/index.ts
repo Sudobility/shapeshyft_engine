@@ -43,7 +43,20 @@ export type LlmProvider =
   | "bfl"
   | "ideogram"
   | "recraft"
-  | "stability";
+  | "stability"
+  // More image providers; `fal` is a multi-model image aggregator (any fal
+  // model id), `alibaba` serves Qwen-Image.
+  | "fal"
+  | "leonardo"
+  | "luma"
+  | "alibaba"
+  | "runway"
+  // Video-generation providers. `pika` is a multi-vendor video gateway.
+  | "kling"
+  | "minimax"
+  | "pika"
+  // Audio-generation provider (text-to-speech)
+  | "elevenlabs";
 
 export type HttpMethod = "GET" | "POST";
 
@@ -150,7 +163,11 @@ export type XaiModel =
   | "grok-4.20-0309-reasoning"
   | "grok-4.20-0309-non-reasoning"
   | "grok-4.20-multi-agent-0309"
-  | "grok-build-0.1";
+  | "grok-build-0.1"
+  // Image generation (OpenAI-compatible /v1/images/generations). Verified
+  // 2026-11-23 against docs.x.ai.
+  | "grok-imagine-image-2.0"
+  | "grok-imagine-image";
 
 /** DeepSeek model options (verified 2026-09-14) */
 export type DeepSeekModel =
@@ -258,6 +275,80 @@ export type StabilityModel =
   | "sd3.5-large-turbo"
   | "sd3.5-medium";
 
+/**
+ * fal.ai aggregator model ids (verified 2026-11-23 against fal.ai/docs). Any
+ * `owner/app[/path]` id fal lists is valid (allowsCustomModel); these are the
+ * popular suggestions. The adapter calls the synchronous `fal.run/{id}` path.
+ */
+export type FalModel =
+  | "fal-ai/flux/dev"
+  | "fal-ai/flux/schnell"
+  | "fal-ai/flux-pro/v1.1"
+  | "fal-ai/fast-sdxl"
+  | "fal-ai/recraft/v3/text-to-image"
+  | "fal-ai/ideogram/v3"
+  | "fal-ai/qwen-image"
+  | "fal-ai/bytedance/seedream/v4/text-to-image"
+  | "fal-ai/luma-photon"
+  | (string & {});
+
+/**
+ * Leonardo.ai image models (verified 2026-11-23 against docs.leonardo.ai). The
+ * `modelId` is a UUID; these friendly ids are mapped to UUIDs by the adapter.
+ */
+export type LeonardoModel =
+  | "lucid-origin"
+  | "lucid-realism"
+  | "phoenix-1.0"
+  | "flux-dev"
+  | "flux-schnell";
+
+/**
+ * Luma AI image models (Photon; verified 2026-11-23 against docs.lumalabs.ai).
+ * Text-to-image only here -- Luma accepts reference images only as public URLs,
+ * not base64.
+ */
+export type LumaModel = "photon-1" | "photon-flash-1";
+
+/**
+ * Alibaba Qwen-Image models (verified 2026-11-23 against help.aliyun.com
+ * model-studio). Synchronous multimodal-generation endpoint.
+ */
+export type AlibabaModel = "qwen-image-3.0-pro" | "qwen-image-2.0";
+
+/**
+ * Runway Gen-4 image models (verified 2026-11-23 against docs.dev.runwayml.com).
+ * `gen4_image_turbo` requires at least one reference image.
+ */
+export type RunwayModel = "gen4_image" | "gen4_image_turbo";
+
+/**
+ * Kuaishou Kling video models (verified 2026-11-23 against kling.ai/document-api,
+ * current path-based design). Model id goes in the URL path.
+ */
+export type KlingModel =
+  "kling-2.6" | "kling-2.5-turbo" | "kling-4.0" | "kling-4.0-flash";
+
+/**
+ * MiniMax Hailuo video models (verified 2026-11-23 against platform.minimax.io).
+ */
+export type MinimaxModel =
+  "MiniMax-Hailuo-2.3" | "MiniMax-Hailuo-02" | "T2V-01-Director" | "T2V-01";
+
+/**
+ * Pika video gateway (verified 2026-11-23 against dev.pika.art). Pika's own
+ * multi-vendor gateway; the model id is a `vendor/model/function` operation slug
+ * pulled from its live catalog (allowsCustomModel).
+ */
+export type PikaModel = string & {};
+
+/**
+ * ElevenLabs text-to-speech models (verified 2026-11-23 against elevenlabs.io).
+ * The adapter sends a default voice; billing is per character.
+ */
+export type ElevenLabsModel =
+  "eleven_multilingual_v2" | "eleven_v4" | "eleven_v3" | "eleven_flash_v2_5";
+
 /** Union of all model types */
 export type LlmModel =
   | OpenAiModel
@@ -275,6 +366,15 @@ export type LlmModel =
   | IdeogramModel
   | RecraftModel
   | StabilityModel
+  | FalModel
+  | LeonardoModel
+  | LumaModel
+  | AlibabaModel
+  | RunwayModel
+  | KlingModel
+  | MinimaxModel
+  | PikaModel
+  | ElevenLabsModel
   | LlmServerModel;
 
 /** List of available providers */
@@ -296,6 +396,15 @@ export const LLM_PROVIDERS: LlmProvider[] = [
   "ideogram",
   "recraft",
   "stability",
+  "fal",
+  "leonardo",
+  "luma",
+  "alibaba",
+  "runway",
+  "kling",
+  "minimax",
+  "pika",
+  "elevenlabs",
 ];
 
 /**
@@ -394,6 +503,8 @@ export const PROVIDER_MODELS: Record<LlmProvider, readonly string[]> = {
     "grok-4.20-0309-non-reasoning",
     "grok-4.20-multi-agent-0309",
     "grok-build-0.1",
+    "grok-imagine-image-2.0",
+    "grok-imagine-image",
   ] as const,
   deepseek: ["deepseek-flash", "deepseek-v4-pro", "deepseek-v4-flash"] as const,
   perplexity: [
@@ -440,6 +551,52 @@ export const PROVIDER_MODELS: Record<LlmProvider, readonly string[]> = {
     "sd3.5-large-turbo",
     "sd3.5-medium",
   ] as const,
+  // fal.ai aggregator -- any `owner/app[/path]` id (allowsCustomModel).
+  fal: [
+    "fal-ai/flux/dev",
+    "fal-ai/flux/schnell",
+    "fal-ai/flux-pro/v1.1",
+    "fal-ai/fast-sdxl",
+    "fal-ai/recraft/v3/text-to-image",
+    "fal-ai/ideogram/v3",
+    "fal-ai/qwen-image",
+    "fal-ai/bytedance/seedream/v4/text-to-image",
+    "fal-ai/luma-photon",
+  ] as const,
+  leonardo: [
+    "lucid-origin",
+    "lucid-realism",
+    "phoenix-1.0",
+    "flux-dev",
+    "flux-schnell",
+  ] as const,
+  luma: ["photon-1", "photon-flash-1"] as const,
+  alibaba: ["qwen-image-3.0-pro", "qwen-image-2.0"] as const,
+  runway: ["gen4_image", "gen4_image_turbo"] as const,
+  kling: [
+    "kling-2.6",
+    "kling-2.5-turbo",
+    "kling-4.0",
+    "kling-4.0-flash",
+  ] as const,
+  minimax: [
+    "MiniMax-Hailuo-2.3",
+    "MiniMax-Hailuo-02",
+    "T2V-01-Director",
+    "T2V-01",
+  ] as const,
+  // Pika multi-vendor video gateway -- any operation slug (allowsCustomModel);
+  // these are suggestions pulled from its catalog.
+  pika: [
+    "pika/pika-2.5/text-to-video",
+    "pika/pika-2.5/image-to-video",
+  ] as const,
+  elevenlabs: [
+    "eleven_multilingual_v2",
+    "eleven_v4",
+    "eleven_v3",
+    "eleven_flash_v2_5",
+  ] as const,
 } as const;
 
 /**
@@ -457,8 +614,15 @@ export function isValidModelForProvider(
   model: string
 ): boolean {
   const models = PROVIDER_MODELS[provider];
-  // lm_studio and openrouter accept any model string
-  if (provider === "lm_studio" || provider === "openrouter") return true;
+  // lm_studio and openrouter accept any model string, as do the aggregators
+  // (fal routes any fal model id; pika routes any gateway operation slug).
+  if (
+    provider === "lm_studio" ||
+    provider === "openrouter" ||
+    provider === "fal" ||
+    provider === "pika"
+  )
+    return true;
   return models.includes(model);
 }
 

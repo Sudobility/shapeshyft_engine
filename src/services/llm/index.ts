@@ -14,7 +14,7 @@ import { GeminiProvider } from "./gemini.js";
 import { GroqProvider } from "./groq.js";
 import { CustomLLMProvider } from "./custom.js";
 import { JevProvider } from "./jev.js";
-import { ImageOnlyProvider } from "./image-only.js";
+import { MediaOnlyProvider } from "./image-only.js";
 import { OPENAI_COMPATIBLE_BASE_URLS } from "../../core/endpoints.js";
 import { openAIChatDialect } from "../../core/payload.js";
 
@@ -93,15 +93,26 @@ export function createLLMProvider(
       return new CustomLLMProvider(config);
     case "jev":
       return new JevProvider(config);
-    // Image-generation providers. The engine returns a stub; the real image
-    // API calls are made by each product's image-provider wrapper, which
-    // intercepts image requests before they reach this base provider.
+    // Media-generation providers (image, video, audio). The engine returns a
+    // stub; the real API calls are made by each product's media/image-provider
+    // wrapper, which intercepts media requests before they reach this base
+    // provider. (xAI's image path is layered on in that wrapper too, but xAI is
+    // a full text provider above, so it is not listed here.)
     case "bytedance":
     case "bfl":
     case "ideogram":
     case "recraft":
     case "stability":
-      return new ImageOnlyProvider(providerType);
+    case "fal":
+    case "leonardo":
+    case "luma":
+    case "alibaba":
+    case "runway":
+    case "kling":
+    case "minimax":
+    case "pika":
+    case "elevenlabs":
+      return new MediaOnlyProvider(providerType);
     default:
       throw new Error(`Unknown provider type: ${providerType}`);
   }
